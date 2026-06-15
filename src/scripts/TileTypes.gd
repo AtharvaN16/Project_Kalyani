@@ -8,7 +8,8 @@ enum Type {
 	FOREST,   # Dark Green
 	MOUNTAIN, # Gray
 	HILL,     # Yellow-Green
-	SWAMP     # Olive
+	SWAMP,    # Olive
+	TOWN_CENTER # Orange
 }
 
 const COLORS = {
@@ -17,7 +18,8 @@ const COLORS = {
 	Type.FOREST: Color(0.1, 0.4, 0.1),
 	Type.MOUNTAIN: Color(0.5, 0.5, 0.5),
 	Type.HILL: Color(0.6, 0.7, 0.2),
-	Type.SWAMP: Color(0.3, 0.4, 0.2)
+	Type.SWAMP: Color(0.3, 0.4, 0.2),
+	Type.TOWN_CENTER: Color(1.0, 0.5, 0.0) # Orange
 }
 
 const PROBABILITIES = {

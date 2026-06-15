@@ -9,15 +9,27 @@ const VIEW_DISTANCE = 1 # Chunks around player (3x3 grid)
 # --- State ---
 var seed_value = 12345
 var noise = FastNoiseLite.new()
+var tileset_resource: TileSet
 var loaded_chunks = {} # chunk_key (Vector2i) -> TileMapLayer
 var tile_data = {}     # chunk_key -> Array (The "Memory" of the world)
 var revealed_tiles = {} # global_tile_pos -> bool (Fog of War persistence)
+var buildings = {}      # global_tile_pos -> int (Building Type)
 
 # --- Nodes ---
 @onready var camera = $Camera2D
 
 func _ready():
+	tileset_resource = TileSetGenerator.create_placeholder_tileset()
 	setup_noise()
+	
+	# Place Town Center at map center
+	var center = Vector2i(WORLD_SIZE / 2, WORLD_SIZE / 2)
+	buildings[center] = TileTypes.Type.TOWN_CENTER
+	reveal_area(center, 10) # Reveal 10-tile radius around TC
+	
+	# Move camera to TC
+	camera.global_position = Vector2(center.x * TILE_SIZE, center.y * TILE_SIZE)
+	
 	update_chunks()
 
 func setup_noise():
@@ -63,6 +75,7 @@ func load_chunk(coords: Vector2i):
 
 	var layer = TileMapLayer.new()
 	layer.name = "Chunk_%d_%d" % [coords.x, coords.y]
+	layer.tile_set = tileset_resource
 	layer.position = Vector2(coords.x * CHUNK_SIZE * TILE_SIZE, coords.y * CHUNK_SIZE * TILE_SIZE)
 	
 	# Generate or retrieve data
@@ -94,20 +107,32 @@ func get_tile_type_from_noise(val: float) -> int:
 	if val < 0.8: return TileTypes.Type.SWAMP
 	return TileTypes.Type.MOUNTAIN
 
+func reveal_area(center: Vector2i, radius: int):
+	for x in range(-radius, radius + 1):
+		for y in range(-radius, radius + 1):
+			var pos = center + Vector2i(x, y)
+			if pos.x >= 0 and pos.y >= 0 and pos.x < WORLD_SIZE and pos.y < WORLD_SIZE:
+				# Circle reveal
+				if Vector2(pos).distance_to(Vector2(center)) <= radius:
+					revealed_tiles[pos] = true
+
 func render_chunk(layer: TileMapLayer, coords: Vector2i):
-	# Note: In a real project, we'd use a TileSet resource.
-	# For this script, we assume tile 0 is the correct graphic.
 	var data = tile_data[coords]
 	for x in range(CHUNK_SIZE):
 		for y in range(CHUNK_SIZE):
-			var tile_type = data[x][y]
-			# Fog of War Check
 			var global_pos = Vector2i((coords.x * CHUNK_SIZE) + x, (coords.y * CHUNK_SIZE) + y)
+			
+			# Fog of War Check
 			if revealed_tiles.has(global_pos):
-				layer.set_cell(Vector2i(x, y), 0, Vector2i(tile_type, 0))
+				# Check for building first
+				if buildings.has(global_pos):
+					layer.set_cell(Vector2i(x, y), 0, Vector2i(6, 0)) # Town Center tile index
+				else:
+					var tile_type = data[x][y]
+					layer.set_cell(Vector2i(x, y), 0, Vector2i(tile_type, 0))
 			else:
 				# Set hidden/shroud tile
-				layer.set_cell(Vector2i(x, y), 0, Vector2i(7, 0)) # Assuming 7 is hidden
+				layer.set_cell(Vector2i(x, y), 0, Vector2i(7, 0)) # Shroud tile index
 
 func unload_chunk(coords: Vector2i):
 	if loaded_chunks.has(coords):
@@ -121,5 +146,9 @@ func reveal_tile(global_pos: Vector2i):
 		# Re-render local part of the chunk
 		var local_x = global_pos.x % CHUNK_SIZE
 		var local_y = global_pos.y % CHUNK_SIZE
-		var tile_type = tile_data[chunk_coords][local_x][local_y]
-		loaded_chunks[chunk_coords].set_cell(Vector2i(local_x, local_y), 0, Vector2i(tile_type, 0))
+		# Check for building
+		if buildings.has(global_pos):
+			loaded_chunks[chunk_coords].set_cell(Vector2i(local_x, local_y), 0, Vector2i(6, 0))
+		else:
+			var tile_type = tile_data[chunk_coords][local_x][local_y]
+			loaded_chunks[chunk_coords].set_cell(Vector2i(local_x, local_y), 0, Vector2i(tile_type, 0))
