@@ -1,9 +1,9 @@
 # AGENTS.md - EMPIRE OF RUINS (Agent-Agnostic Instructions)
 
 ## Project Overview
-A slow, single-player empire-builder game focusing on organic growth and internal management.
-**Tech Stack:** Python 3, Pygame, JSON data/save formats.
-**Current State:** Design Phase (see `ProectKalyanicontext.md`).
+A massive, single-player empire-builder game focusing on organic growth and internal management at scale.
+**Tech Stack:** Godot 4, GDScript.
+**Current State:** Design Phase / Pivoting to Large-Scale Map.
 
 ## Core Conventions
 1. **Design First:** Always brainstorm and plan before modifying the design document or code.
