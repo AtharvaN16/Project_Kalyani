@@ -1,0 +1,36 @@
+{
+  "turn": 5,
+  "season": "Spring",
+  "global_resources": {
+    "gold": 0
+  },
+  "settlements": [
+    {
+      "id": "ruined_fort_01",
+      "name": "Ruined Fort",
+      "tier": "Hamlet",
+      "position": [
+        25,
+        25
+      ],
+      "population": {
+        "total": 20,
+        "employed": 0,
+        "unemployed": 20,
+        "loyalty": 80
+      },
+      "resources": {
+        "wood": 15,
+        "stone": 8,
+        "food": 24
+      },
+      "buildings": [
+        {
+          "type": "ruined_fort",
+          "status": "damaged"
+        }
+      ],
+      "specialization": null
+    }
+  ]
+}
