@@ -15,6 +15,8 @@ var tile_data = {}       # chunk_key -> Array
 var explored_tiles = {}  # global_tile_pos -> bool (Revealed once)
 var visible_tiles = {}   # global_tile_pos -> bool (Currently in vision)
 var buildings = {}       # global_tile_pos -> int (Building Type)
+var units = []           # Array of Unit objects
+var selected_unit: Unit = null
 
 # --- Nodes ---
 @onready var camera = $Camera2D
@@ -23,16 +25,14 @@ func _ready():
 	tileset_resource = TileSetGenerator.create_placeholder_tileset()
 	setup_noise()
 	
-	# Place 4x4 Town Center at map center
 	var center = Vector2i(WORLD_SIZE / 2, WORLD_SIZE / 2)
 	place_building(center, 4, TileTypes.Type.TOWN_CENTER)
 	
-	# Initial reveal
+	# Spawn Scout
+	spawn_unit(center + Vector2i(5, 5))
+	
 	update_vision()
-	
-	# Move camera to TC
 	camera.global_position = Vector2(center.x * TILE_SIZE, center.y * TILE_SIZE)
-	
 	update_chunks()
 
 func setup_noise():
@@ -50,6 +50,32 @@ func get_chunk_coords(world_pos: Vector2) -> Vector2i:
 		floor(world_pos.x / (CHUNK_SIZE * TILE_SIZE)),
 		floor(world_pos.y / (CHUNK_SIZE * TILE_SIZE))
 	)
+
+func spawn_unit(pos: Vector2i):
+	var scout = Unit.new()
+	scout.setup(pos, self)
+	add_child(scout)
+	units.append(scout)
+
+func _unhandled_input(event):
+	if event is InputEventMouseButton and event.pressed:
+		var mouse_pos = get_global_mouse_position()
+		var grid_click = Vector2i(floor(mouse_pos.x / TILE_SIZE), floor(mouse_pos.y / TILE_SIZE))
+		
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			# Selection logic
+			selected_unit = null
+			for u in units:
+				if u.grid_pos == grid_click:
+					selected_unit = u
+					print("Scout Selected at ", grid_click)
+					break
+		
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			# Move logic
+			if selected_unit:
+				selected_unit.move_to(grid_click)
+				print("Moving Scout to ", grid_click)
 
 func update_chunks():
 	var center_chunk = get_chunk_coords(camera.global_position)
@@ -110,10 +136,15 @@ func place_building(top_left: Vector2i, size: int, type: int):
 			buildings[pos] = type
 
 func update_vision():
-	# For now, vision comes from the Town Center
-	var center = Vector2i(WORLD_SIZE / 2, WORLD_SIZE / 2)
 	visible_tiles.clear()
-	reveal_area(center, 12)
+	
+	# Vision from Buildings
+	for pos in buildings.keys():
+		reveal_area(pos, 8) 
+		
+	# Vision from Units
+	for u in units:
+		reveal_area(u.grid_pos, u.vision_radius)
 
 func reveal_area(center: Vector2i, radius: int):
 	for x in range(-radius, radius + 1):
@@ -124,7 +155,12 @@ func reveal_area(center: Vector2i, radius: int):
 					explored_tiles[pos] = true
 					visible_tiles[pos] = true
 
+func refresh_all_chunks():
+	for key in loaded_chunks.keys():
+		render_chunk(loaded_chunks[key], key)
+
 func render_chunk(layer: TileMapLayer, coords: Vector2i):
+	layer.clear()
 	var data = tile_data[coords]
 	for x in range(CHUNK_SIZE):
 		for y in range(CHUNK_SIZE):
@@ -132,16 +168,25 @@ func render_chunk(layer: TileMapLayer, coords: Vector2i):
 			
 			if visible_tiles.has(global_pos):
 				# FULL VISION
+				# Check for unit first
+				var has_unit = false
+				for u in units:
+					if u.grid_pos == global_pos:
+						layer.set_cell(Vector2i(x, y), 0, Vector2i(7, 0)) # Scout index
+						has_unit = true
+						break
+				if has_unit: continue
+
 				if buildings.has(global_pos):
 					layer.set_cell(Vector2i(x, y), 0, Vector2i(6, 0)) # TC index
 				else:
 					layer.set_cell(Vector2i(x, y), 0, Vector2i(data[x][y], 0))
 			elif explored_tiles.has(global_pos):
 				# EXPLORED BUT NO VISION (FOG)
-				layer.set_cell(Vector2i(x, y), 0, Vector2i(8, 0)) # Fog index
+				layer.set_cell(Vector2i(x, y), 0, Vector2i(9, 0)) # Fog index
 			else:
 				# NEVER EXPLORED (SHROUD)
-				layer.set_cell(Vector2i(x, y), 0, Vector2i(7, 0)) # Shroud index
+				layer.set_cell(Vector2i(x, y), 0, Vector2i(8, 0)) # Shroud index
 
 func unload_chunk(coords: Vector2i):
 	if loaded_chunks.has(coords):

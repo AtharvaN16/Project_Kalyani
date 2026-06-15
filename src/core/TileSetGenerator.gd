@@ -19,8 +19,9 @@ static func create_placeholder_tileset() -> TileSet:
 		TileTypes.Type.HILL,
 		TileTypes.Type.SWAMP,
 		TileTypes.Type.TOWN_CENTER, # 6
-		TileTypes.Type.SHROUD,      # 7
-		TileTypes.Type.FOG          # 8
+		TileTypes.Type.SCOUT,       # 7
+		TileTypes.Type.SHROUD,      # 8
+		TileTypes.Type.FOG          # 9
 	]
 	
 	for i in range(types.size()):
