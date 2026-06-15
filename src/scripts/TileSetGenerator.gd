@@ -8,7 +8,7 @@ static func create_placeholder_tileset() -> TileSet:
 	
 	var source = TileSetAtlasSource.new()
 	# We'll create a single large texture with different colored squares
-	var image = Image.create(256, 32, false, Image.FORMAT_RGBA8)
+	var image = Image.create(512, 32, false, Image.FORMAT_RGBA8)
 	
 	# Fill different regions with terrain colors
 	var types = [
@@ -19,16 +19,12 @@ static func create_placeholder_tileset() -> TileSet:
 		TileTypes.Type.HILL,
 		TileTypes.Type.SWAMP,
 		TileTypes.Type.TOWN_CENTER, # 6
-		7 # Hidden/Shroud (now 7)
+		TileTypes.Type.SHROUD,      # 7
+		TileTypes.Type.FOG          # 8
 	]
 	
 	for i in range(types.size()):
-		var color = Color.BLACK
-		if i == 7:
-			color = Color(0.1, 0.1, 0.1) # Dark gray for shroud
-		else:
-			color = TileTypes.COLORS[types[i]]
-			
+		var color = TileTypes.COLORS[types[i]]
 		image.fill_rect(Rect2i(i * 32, 0, 32, 32), color)
 	
 	var texture = ImageTexture.create_from_image(image)

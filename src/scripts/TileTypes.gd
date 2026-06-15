@@ -9,7 +9,9 @@ enum Type {
 	MOUNTAIN, # Gray
 	HILL,     # Yellow-Green
 	SWAMP,    # Olive
-	TOWN_CENTER # Orange
+	TOWN_CENTER, # Orange
+	SHROUD,      # Complete Dark (Never Explored)
+	FOG          # Semi Dark (Explored but no vision)
 }
 
 const COLORS = {
@@ -19,7 +21,9 @@ const COLORS = {
 	Type.MOUNTAIN: Color(0.5, 0.5, 0.5),
 	Type.HILL: Color(0.6, 0.7, 0.2),
 	Type.SWAMP: Color(0.3, 0.4, 0.2),
-	Type.TOWN_CENTER: Color(1.0, 0.5, 0.0) # Orange
+	Type.TOWN_CENTER: Color(1.0, 0.5, 0.0), # Orange
+	Type.SHROUD: Color(0.05, 0.05, 0.05),   # Almost Black
+	Type.FOG: Color(0.15, 0.15, 0.15)      # Dark Gray
 }
 
 const PROBABILITIES = {
