@@ -1,7 +1,9 @@
-[gd_scene format=3 uid="uid://b8y8u6v4m1n5x"]
+[gd_scene load_steps=5 format=3 uid="uid://b8y8u6v4m1n5x"]
 
 [ext_resource type="Script" path="res://src/core/Map.gd" id="1_map"]
 [ext_resource type="Script" path="res://src/core/Camera.gd" id="2_camera"]
+[ext_resource type="Script" path="res://src/core/Selector.gd" id="3_selector"]
+[ext_resource type="PackedScene" uid="uid://ccxy1p4yv2n0b" path="res://src/scenes/HUD.tscn" id="4_hud"]
 
 [node name="Main" type="Node2D"]
 
@@ -10,3 +12,8 @@ script = ExtResource("1_map")
 
 [node name="Camera2D" type="Camera2D" parent="Map"]
 script = ExtResource("2_camera")
+
+[node name="Selector" type="Node2D" parent="Map"]
+script = ExtResource("3_selector")
+
+[node name="HUD" parent="." instance=ExtResource("4_hud")]
