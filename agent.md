@@ -24,6 +24,7 @@ Refer to the individual `SKILL.md` files in `agent-skills/` for full instruction
 - **writing-plans:** `agent-skills/writing-plans/SKILL.md` - "Execute all work via bite-sized `writing-plans`."
 - **subagents:** `agent-skills/subagent-development/SKILL.md` - "Use subagents for batch tasks and high-volume output."
 - **debugging:** `agent-skills/systematic-debugging/SKILL.md` - "Use systematic debugging for complex issues."
+- **save-context:** `agent-skills/save-context/SKILL.md` - "Automate saving context to the `context/` directory while respecting file limits."
 
 ### Extensibility (Vercel Labs)
 - **find-skills:** `agent-skills/find-skills/SKILL.md` - "Use `npx skills find [query]` to discover modular tools for new requirements."
